@@ -243,6 +243,9 @@
 #elif defined (SSD1351_DRIVER)
      #include "TFT_Drivers/SSD1351_Defines.h"
      #define  TFT_DRIVER 0x1351
+#elif defined (SSD1681_DRIVER)
+     #include "TFT_Drivers/SSD1681_Defines.h"
+     #define  TFT_DRIVER 0x1681
 #elif defined (SSD1963_480_DRIVER)
      #include "TFT_Drivers/SSD1963_Defines.h"
      #define  TFT_DRIVER 0x1963

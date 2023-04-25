@@ -751,6 +751,9 @@ void TFT_eSPI::init(uint8_t tc)
 #elif defined (SSD1351_DRIVER)
     #include "TFT_Drivers/SSD1351_Init.h"
 
+#elif defined (SSD1681_DRIVER)
+    #include "TFT_Drivers/SSD1681_Init.h"
+
 #elif defined (SSD1963_DRIVER)
     #include "TFT_Drivers/SSD1963_Init.h"
 
@@ -851,6 +854,9 @@ void TFT_eSPI::setRotation(uint8_t m)
 
 #elif defined (SSD1351_DRIVER)
     #include "TFT_Drivers/SSD1351_Rotation.h"
+
+#elif defined (SSD1681_DRIVER)
+    #include "TFT_Drivers/SSD1681_Rotation.h"
 
 #elif defined (SSD1963_DRIVER)
     #include "TFT_Drivers/SSD1963_Rotation.h"
@@ -3385,7 +3391,7 @@ void TFT_eSPI::setWindow(int32_t x0, int32_t y0, int32_t x1, int32_t y1)
     while (spi_get_hw(SPI_X)->sr & SPI_SSPSR_BSY_BITS) {};
     hw_write_masked(&spi_get_hw(SPI_X)->cr0, (16 - 1) << SPI_SSPCR0_DSS_LSB, SPI_SSPCR0_DSS_BITS);
   #endif
-#elif defined (SSD1351_DRIVER)
+#elif defined (SSD1351_DRIVER) || defined (SSD1681_DRIVER) // hgiang TODO check!
   if (rotation & 1) {
     transpose(x0, y0);
     transpose(x1, y1);
@@ -3735,7 +3741,7 @@ void TFT_eSPI::drawPixel(int32_t x, int32_t y, uint32_t color)
 
     SPI_BUSY_CHECK;
 
-  #if defined (SSD1351_DRIVER)
+  #if defined (SSD1351_DRIVER) || defined (SSD1681_DRIVER) // hgiang TODO
     if (rotation & 0x1) { transpose(x, y); }
     // No need to send x if it has not changed (speeds things up)
     if (addr_col != x) {

@@ -62,6 +62,8 @@
     #define ST7796_DRIVER
 #elif defined (CONFIG_TFT_SSD1351_DRIVER)
     #define SSD1351_DRIVER
+#elif defined (CONFIG_TFT_SSD1681_DRIVER)
+    #define SSD1681_DRIVER
 #elif defined (CONFIG_TFT_SSD1963_480_DRIVER)
     #define SSD1963_480_DRIVER
 #elif defined (CONFIG_TFT_SSD1963_800_DRIVER)
