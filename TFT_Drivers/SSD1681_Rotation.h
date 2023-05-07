@@ -1,5 +1,6 @@
 
 // This is the command sequence that rotates the SSD1351 driver coordinate frame
+// TODO: this is not gonna work - hgiang
 
   rotation = m % 4; // Limit the range of values to 0-3
 

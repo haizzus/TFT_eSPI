@@ -610,6 +610,10 @@ void TFT_eSPI::begin(uint8_t tc)
 ***************************************************************************************/
 void TFT_eSPI::init(uint8_t tc)
 {
+  digitalWrite(A15, 0);
+  delay(10);
+  digitalWrite(A15, 1);
+  delay(10);
   if (_booted)
   {
     initBus();
@@ -985,6 +989,7 @@ void TFT_eSPI::spiwrite(uint8_t c)
 #ifndef RM68120_DRIVER
 void TFT_eSPI::writecommand(uint8_t c)
 {
+  EPD_BUSY_CHECK;
   begin_tft_write();
 
   DC_C;
@@ -2586,7 +2591,16 @@ void TFT_eSPI::fillEllipse(int16_t x0, int16_t y0, int32_t rx, int32_t ry, uint1
 ***************************************************************************************/
 void TFT_eSPI::fillScreen(uint32_t color)
 {
+    writecommand(0x24);
+
   fillRect(0, 0, _width, _height, color);
+    end_tft_write();
+      delay(100);
+  writecommand(0x22); //Display Update Control
+  writedata(0xC7);   
+  writecommand(0x20); //Activate Display Update Sequence
+    writecommand(0x10); //enter deep sleep
+  writedata(0x01); 
 }
 
 
@@ -3391,7 +3405,7 @@ void TFT_eSPI::setWindow(int32_t x0, int32_t y0, int32_t x1, int32_t y1)
     while (spi_get_hw(SPI_X)->sr & SPI_SSPSR_BSY_BITS) {};
     hw_write_masked(&spi_get_hw(SPI_X)->cr0, (16 - 1) << SPI_SSPCR0_DSS_LSB, SPI_SSPCR0_DSS_BITS);
   #endif
-#elif defined (SSD1351_DRIVER) || defined (SSD1681_DRIVER) // hgiang TODO check!
+#elif defined (SSD1351_DRIVER)
   if (rotation & 1) {
     transpose(x0, y0);
     transpose(x1, y1);
@@ -3403,6 +3417,8 @@ void TFT_eSPI::setWindow(int32_t x0, int32_t y0, int32_t x1, int32_t y1)
   DC_D; tft_Write_16(y1 | (y0 << 8));
   DC_C; tft_Write_8(TFT_RAMWR);
   DC_D;
+#elif defined (SSD1681_DRIVER) // hgiang TODO check! do we really need this?
+
 #else
   #if defined (SSD1963_DRIVER)
     if ((rotation & 0x1) == 0) { transpose(x0, y0); transpose(x1, y1); }
@@ -3582,6 +3598,7 @@ void TFT_eSPI::readAddrWindow(int32_t xs, int32_t ys, int32_t w, int32_t h)
 ***************************************************************************************/
 void TFT_eSPI::drawPixel(int32_t x, int32_t y, uint32_t color)
 {
+      // writecommand(0x24);
   if (_vpOoB) return;
 
   x+= _xDatum;
@@ -3781,7 +3798,12 @@ void TFT_eSPI::drawPixel(int32_t x, int32_t y, uint32_t color)
   #endif
 #endif
 
-  end_tft_write();
+  // end_tft_write();
+  //     end_tft_write();
+  //     delay(100);
+  // writecommand(0x22); //Display Update Control
+  // writedata(0xC7);   
+  // writecommand(0x20); //Activate Display Update Sequence
 }
 
 /***************************************************************************************
@@ -3821,6 +3843,8 @@ void TFT_eSPI::startWrite(void)
   begin_tft_write();
   lockTransaction = true; // Lock transaction for all sequentially run sketch functions
   inTransaction = true;
+    writecommand(0x24);
+
 }
 
 /***************************************************************************************
@@ -3833,6 +3857,10 @@ void TFT_eSPI::endWrite(void)
   inTransaction = false;
   DMA_BUSY_CHECK;          // Safety check - user code should have checked this!
   end_tft_write();         // Release SPI bus
+    delay(100);
+  writecommand(0x22); //Display Update Control
+  writedata(0xC7);   
+  writecommand(0x20); //Activate Display Update Sequence
 }
 
 /***************************************************************************************
@@ -3850,6 +3878,8 @@ void TFT_eSPI::writeColor(uint16_t color, uint32_t len)
 ***************************************************************************************/
 // Assumed that setAddrWindow() has previously been called
 // len is number of bytes, not pixels
+#define pgm_read_byte(addr)   (*(const unsigned char *)(addr))
+
 void TFT_eSPI::pushColors(uint8_t *data, uint32_t len)
 {
   begin_tft_write();
@@ -3859,7 +3889,22 @@ void TFT_eSPI::pushColors(uint8_t *data, uint32_t len)
   end_tft_write();
 }
 
+void TFT_eSPI::pushColors22( unsigned char *data, uint32_t len)
+{
+  int i;
 
+  delay(100);
+  writecommand(0x24);
+  // for ( i= 0; i < len; i++)
+  //   tft_Write_8(data[i]);
+  while ( len-- ) {tft_Write_8(*data); data++;}
+  delay(100);
+  writecommand(0x22); //Display Update Control
+  writedata(0xC7);   
+  writecommand(0x20); //Activate Display Update Sequence
+  // writecommand(0x10); //enter deep sleep
+  // writedata(0x01); 
+}
 /***************************************************************************************
 ** Function name:           pushColors
 ** Description:             push an array of pixels, for image drawing
@@ -3884,6 +3929,8 @@ void TFT_eSPI::pushColors(uint16_t *data, uint32_t len, bool swap)
 // an efficient FastH/V Line draw routine for line segments of 2 pixels or more
 void TFT_eSPI::drawLine(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color)
 {
+      writecommand(0x24);
+
   if (_vpOoB) return;
 
   //begin_tft_write();       // Sprite class can use this function, avoiding begin_tft_write()
@@ -3942,6 +3989,10 @@ void TFT_eSPI::drawLine(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t
 
   inTransaction = lockTransaction;
   end_tft_write();
+      delay(100);
+  writecommand(0x22); //Display Update Control
+  writedata(0xC7);   
+  writecommand(0x20); //Activate Display Update Sequence
 }
 
 

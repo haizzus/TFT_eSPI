@@ -494,7 +494,7 @@ class TFT_eSPI : public Print { friend class TFT_eSprite; // Sprite class has ac
   void     pushColor(uint16_t color, uint32_t len),  // Deprecated, use pushBlock()
            pushColors(uint16_t  *data, uint32_t len, bool swap = true), // With byte swap option
            pushColors(uint8_t  *data, uint32_t len); // Deprecated, use pushPixels()
-
+  void     pushColors22( unsigned char *data, uint32_t len);
            // Write a solid block of a single colour
   void     pushBlock(uint16_t color, uint32_t len);
 
