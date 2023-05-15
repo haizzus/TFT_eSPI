@@ -3889,15 +3889,49 @@ void TFT_eSPI::pushColors(uint8_t *data, uint32_t len)
   end_tft_write();
 }
 
+
+static unsigned char temp[100][200];
+
 void TFT_eSPI::pushColors22( unsigned char *data, uint32_t len)
 {
-  int i;
+  int i,j;
 
   delay(100);
   writecommand(0x24);
+  uint8_t real_data = 0;
+
+
+  // hack!
+  // temp = (unsigned char **)data;
+#if 0
+  for (i = 0; i < 100; i++)
+    for (j = 0; j < 200; j++) {
+      temp[i][j] = data[i*200+j];
+    }
+  unsigned char t;
+  for (i = 0; i < 100; i++) 
+    for (j = 0; j < 100; j) {
+      unsigned char t = temp[i][j];
+      temp[i][j] = temp[i][199-j];
+      temp[i][199-j] = t;
+    }
+  data = (unsigned char *)temp;
+#endif
+  // data = (unsigned char *)temp;
   // for ( i= 0; i < len; i++)
   //   tft_Write_8(data[i]);
-  while ( len-- ) {tft_Write_8(*data); data++;}
+  i = 0;
+  while ( len-- ) {
+    real_data = real_data << 1 | *data;
+    // real_data = real_data << 1 | data[len];
+    i ++;
+    if ( i  % 8 == 0) {
+      tft_Write_8(real_data);
+      i = 0;
+    }
+    // tft_Write_8(*data); 
+    data++;
+  }
   delay(100);
   writecommand(0x22); //Display Update Control
   writedata(0xC7);   

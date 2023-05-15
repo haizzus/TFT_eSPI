@@ -51,20 +51,21 @@
   writecommand(0x01); //Driver output control      
   writedata(0xC7);
   writedata(0x00);
-  writedata(0x00);
+  writedata(0x01);
 
   writecommand(0x11); //data entry mode       
-  writedata(0x01);
+  writedata(0x07);
 
   writecommand(0x44); //set Ram-X address start/end position   
   writedata(0x00);
   writedata(0x18);    //0x0C-->(18+1)*8=200
 
-  writecommand(0x45); //set Ram-Y address start/end position          
+  writecommand(0x45); //set Ram-Y address start/end position       
+    writedata(0x00);
+  writedata(0x00);    
   writedata(0xC7);   //0xC7-->(199+1)=200
   writedata(0x00);
-  writedata(0x00);
-  writedata(0x00); 
+
 
   writecommand(0x3C); //BorderWavefrom
   writedata(0x05);  

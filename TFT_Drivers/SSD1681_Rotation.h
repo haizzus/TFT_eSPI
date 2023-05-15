@@ -29,7 +29,7 @@
       break;
   }
 
-  writecommand(0xA0); // SETREMAP
-  writedata(madctl);
-  writecommand(0xA1); // STARTLINE
-  writedata(rotation < 2 ? TFT_HEIGHT : 0);
+  // writecommand(0xA0); // SETREMAP
+  // writedata(madctl);
+  // writecommand(0xA1); // STARTLINE
+  // writedata(rotation < 2 ? TFT_HEIGHT : 0);
